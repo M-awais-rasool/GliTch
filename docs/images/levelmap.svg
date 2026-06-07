@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" font-family="Verdana, Geneva, sans-serif">
+  <rect width="960" height="420" fill="#05060A"/>
+  <g stroke="#0C0E14" stroke-width="1" opacity="0.7">
+    <line x1="90" y1="0" x2="90" y2="420"/><line x1="180" y1="0" x2="180" y2="420"/>
+    <line x1="270" y1="0" x2="270" y2="420"/><line x1="360" y1="0" x2="360" y2="420"/>
+    <line x1="450" y1="0" x2="450" y2="420"/><line x1="540" y1="0" x2="540" y2="420"/>
+    <line x1="630" y1="0" x2="630" y2="420"/><line x1="720" y1="0" x2="720" y2="420"/>
+    <line x1="810" y1="0" x2="810" y2="420"/><line x1="900" y1="0" x2="900" y2="420"/>
+  </g>
+
+  <!-- halos -->
+  <circle cx="120" cy="230" r="46" fill="#3BA0FF" opacity="0.16"/>
+  <circle cx="270" cy="280" r="46" fill="#A14BFF" opacity="0.16"/>
+  <circle cx="420" cy="300" r="46" fill="#3BFF9E" opacity="0.16"/>
+  <circle cx="570" cy="277" r="46" fill="#FFD23B" opacity="0.16"/>
+  <circle cx="720" cy="226" r="46" fill="#4A5160" opacity="0.06"/>
+  <circle cx="870" cy="177" r="46" fill="#4A5160" opacity="0.06"/>
+
+  <!-- path: cleared = solid glow, ahead = dim dashed -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M120 230 C195 230,195 280,270 280" stroke="#3BA0FF" stroke-width="6" opacity="0.95"/>
+    <path d="M270 280 C345 280,345 300,420 300" stroke="#A14BFF" stroke-width="6" opacity="0.95"/>
+    <path d="M420 300 C495 300,495 277,570 277" stroke="#3BFF9E" stroke-width="6" opacity="0.95"/>
+    <path d="M570 277 C645 277,645 226,720 226" stroke="#4A5160" stroke-width="4" stroke-dasharray="10 12" opacity="0.5"/>
+    <path d="M720 226 C795 226,795 177,870 177" stroke="#4A5160" stroke-width="4" stroke-dasharray="10 12" opacity="0.5"/>
+  </g>
+
+  <!-- nodes: completed (filled + check), current (ring + number), locked (dim + lock) -->
+  <!-- completed -->
+  <g>
+    <circle cx="120" cy="230" r="30" fill="#3BA0FF" stroke="#3BA0FF" stroke-width="3"/>
+    <text x="120" y="240" fill="#05060A" font-size="22" font-weight="bold" text-anchor="middle">✓</text>
+    <circle cx="270" cy="280" r="30" fill="#A14BFF" stroke="#A14BFF" stroke-width="3"/>
+    <text x="270" y="290" fill="#05060A" font-size="22" font-weight="bold" text-anchor="middle">✓</text>
+    <circle cx="420" cy="300" r="30" fill="#3BFF9E" stroke="#3BFF9E" stroke-width="3"/>
+    <text x="420" y="310" fill="#05060A" font-size="22" font-weight="bold" text-anchor="middle">✓</text>
+  </g>
+  <!-- current (pulse ring) -->
+  <g>
+    <circle cx="570" cy="277" r="44" fill="none" stroke="#FFD23B" stroke-width="2" opacity="0.5"/>
+    <circle cx="570" cy="277" r="30" fill="#0C0E14" stroke="#FFD23B" stroke-width="3"/>
+    <text x="570" y="287" fill="#FFFFFF" font-size="22" font-weight="bold" text-anchor="middle">4</text>
+  </g>
+  <!-- locked -->
+  <g opacity="0.5">
+    <circle cx="720" cy="226" r="30" fill="#0C0E14" stroke="#4A5160" stroke-width="3"/>
+    <text x="720" y="236" fill="#4A5160" font-size="20" font-weight="bold" text-anchor="middle">🔒</text>
+    <circle cx="870" cy="177" r="30" fill="#0C0E14" stroke="#4A5160" stroke-width="3"/>
+    <text x="870" y="187" fill="#4A5160" font-size="20" font-weight="bold" text-anchor="middle">🔒</text>
+  </g>
+
+  <!-- header -->
+  <text x="28" y="44" fill="#8A93A6" font-size="18" font-weight="bold" letter-spacing="2">‹ MENU</text>
+  <text x="480" y="44" fill="#FFFFFF" font-size="22" font-weight="bold" letter-spacing="4" text-anchor="middle">JOURNEY</text>
+  <text x="932" y="44" fill="#8A93A6" font-size="18" font-weight="bold" text-anchor="end">3/10</text>
+</svg>

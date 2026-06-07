@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="480" viewBox="0 0 960 480" font-family="Verdana, Geneva, sans-serif">
+  <!-- World 1 (CIRCUIT) palette -->
+  <rect width="960" height="480" fill="#04070F"/>
+
+  <!-- parallax grid -->
+  <g stroke="#0C1E38" stroke-width="1" opacity="0.6">
+    <line x1="80" y1="0" x2="80" y2="480"/><line x1="160" y1="0" x2="160" y2="480"/>
+    <line x1="240" y1="0" x2="240" y2="480"/><line x1="320" y1="0" x2="320" y2="480"/>
+    <line x1="400" y1="0" x2="400" y2="480"/><line x1="480" y1="0" x2="480" y2="480"/>
+    <line x1="560" y1="0" x2="560" y2="480"/><line x1="640" y1="0" x2="640" y2="480"/>
+    <line x1="720" y1="0" x2="720" y2="480"/><line x1="800" y1="0" x2="800" y2="480"/>
+    <line x1="880" y1="0" x2="880" y2="480"/>
+    <line x1="0" y1="120" x2="960" y2="120"/><line x1="0" y1="240" x2="960" y2="240"/>
+    <line x1="0" y1="360" x2="960" y2="360"/>
+  </g>
+
+  <!-- platforms -->
+  <g>
+    <rect x="0" y="360" width="430" height="120" fill="#15243C"/>
+    <rect x="0" y="360" width="430" height="4" fill="#2E6098"/>
+    <rect x="540" y="360" width="420" height="120" fill="#15243C"/>
+    <rect x="540" y="360" width="420" height="4" fill="#2E6098"/>
+  </g>
+
+  <!-- spikes (hazard) -->
+  <g fill="#FF4B6E">
+    <polygon points="610,360 626,326 642,360"/>
+    <polygon points="642,360 658,326 674,360"/>
+    <polygon points="674,360 690,326 706,360"/>
+  </g>
+
+  <!-- saw blade -->
+  <g>
+    <circle cx="470" cy="300" r="26" fill="#FF4B6E"/>
+    <circle cx="470" cy="300" r="26" fill="none" stroke="#04070F" stroke-width="7" stroke-dasharray="7 7"/>
+    <circle cx="470" cy="300" r="11" fill="#04070F"/>
+    <circle cx="470" cy="300" r="4" fill="#FF4B6E"/>
+  </g>
+
+  <!-- goal portal (green) -->
+  <g>
+    <rect x="838" y="292" width="64" height="68" rx="12" fill="#3BFF9E" opacity="0.18"/>
+    <rect x="844" y="298" width="52" height="62" rx="10" fill="none" stroke="#3BFF9E" stroke-width="3"/>
+    <polygon points="864,316 884,329 864,342" fill="#3BFF9E"/>
+  </g>
+
+  <!-- character (white neon robot) -->
+  <g>
+    <rect x="276" y="296" width="52" height="60" rx="12" fill="#3BA0FF" opacity="0.22"/>
+    <rect x="282" y="302" width="40" height="48" rx="10" fill="#FFFFFF"/>
+    <rect x="287" y="309" width="30" height="15" rx="7" fill="#05060A"/>
+    <rect x="296" y="312" width="6" height="9" rx="3" fill="#3BA0FF"/>
+    <rect x="305" y="312" width="6" height="9" rx="3" fill="#3BA0FF"/>
+    <rect x="300" y="286" width="4" height="12" rx="2" fill="#FFFFFF"/>
+    <circle cx="302" cy="284" r="4.5" fill="#3BA0FF"/>
+    <rect x="286" y="350" width="11" height="6" rx="3" fill="#05060A"/>
+    <rect x="307" y="350" width="11" height="6" rx="3" fill="#05060A"/>
+  </g>
+
+  <!-- HUD -->
+  <text x="28" y="44" fill="#FFFFFF" font-size="20" font-weight="bold" letter-spacing="2">1  FIRST STEPS</text>
+  <text x="28" y="68" fill="#8A93A6" font-size="13" letter-spacing="1">Watch your step.</text>
+  <text x="892" y="46" fill="#FF4B6E" font-size="22" font-weight="bold" text-anchor="end">✕ 2</text>
+
+  <!-- controls -->
+  <g>
+    <circle cx="70" cy="420" r="34" fill="#0C0E14" stroke="#3BA0FF" stroke-width="2" opacity="0.7"/>
+    <text x="70" y="431" fill="#3BA0FF" font-size="30" font-weight="bold" text-anchor="middle">‹</text>
+    <circle cx="150" cy="420" r="34" fill="#0C0E14" stroke="#3BA0FF" stroke-width="2" opacity="0.7"/>
+    <text x="150" y="431" fill="#3BA0FF" font-size="30" font-weight="bold" text-anchor="middle">›</text>
+    <circle cx="888" cy="416" r="42" fill="#0C0E14" stroke="#3BFF9E" stroke-width="2" opacity="0.8"/>
+    <text x="888" y="430" fill="#3BFF9E" font-size="34" font-weight="bold" text-anchor="middle">⤴</text>
+  </g>
+</svg>

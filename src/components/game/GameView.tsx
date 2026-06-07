@@ -7,7 +7,7 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { getWorldTheme, nextLevelId } from '@/levels/registry';
+import { nextLevelId } from '@/levels/registry';
 import { useGameStore } from '@/store/gameStore';
 import { useLevelEngine } from '@/hooks/useLevelEngine';
 import type { Size } from '@/types';
@@ -30,7 +30,7 @@ export const GameView = memo(function GameView({ levelId, size, onExit, onNext }
   const currentLevelId = useGameStore((s) => s.currentLevelId);
 
   const level = engine.level;
-  const theme = getWorldTheme(level.world);
+  const theme = level.theme;
   const next = nextLevelId(level.id);
 
   // Gate on the level id too, so a stale 'complete' status from the previous

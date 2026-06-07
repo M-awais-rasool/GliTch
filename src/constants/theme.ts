@@ -31,10 +31,10 @@ export const GlitchColors = {
 export type GlitchColorKey = keyof typeof GlitchColors;
 export const GLITCH_COLOR_KEYS = Object.keys(GlitchColors) as GlitchColorKey[];
 
-/** Per-world look. Drives backgrounds, platforms, hazards and accents. */
+/** Per-level look. Drives backgrounds, platforms, hazards and accents. */
 export interface WorldTheme {
   name: string;
-  key: GlitchColorKey;
+  key?: GlitchColorKey;
   background: string;
   backgroundGrid: string;
   platform: string;

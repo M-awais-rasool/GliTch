@@ -146,6 +146,47 @@ export class Saw extends BaseEntity {
   }
 }
 
+/** Beam that switches on/off on a timer; lethal only while on. */
+export class Laser extends BaseEntity {
+  private readonly onMs: number;
+  private readonly offMs: number;
+  private readonly phase0: number;
+  private timer: number;
+  private on = true;
+
+  constructor(world: Matter.World, id: string, def: Def<'laser'>) {
+    super(world, id, 'laser', def);
+    this.onMs = def.onMs ?? 900;
+    this.offMs = def.offMs ?? 900;
+    this.phase0 = def.phase ?? 0;
+    this.timer = this.phase0;
+    this.render.extra.value = 1;
+  }
+
+  update(ctx: EntityContext): void {
+    this.timer += ctx.dtMs;
+    const period = this.on ? this.onMs : this.offMs;
+    if (this.timer >= period) {
+      this.timer = 0;
+      this.on = !this.on;
+    }
+    this.render.extra.value = this.on ? 1 : 0;
+    this.render.alpha.value = this.on ? 1 : 0.12;
+  }
+
+  hazardRect(): RectLike | null {
+    return this.on ? this.currentRect() : null;
+  }
+
+  reset(): void {
+    super.reset();
+    this.timer = this.phase0;
+    this.on = true;
+    this.render.extra.value = 1;
+    this.render.alpha.value = 1;
+  }
+}
+
 export class Crusher extends BaseEntity {
   private dir = 1; // 1 = descending, -1 = rising
   private pauseLeft = 0;

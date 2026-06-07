@@ -8,8 +8,16 @@ import type Matter from 'matter-js';
 import type { EntityDef } from '@/levels/types';
 
 import type { LevelEntity } from './LevelEntity';
-import { CrumblePlatform, FakePlatform, MovingPlatform, SolidPlatform } from './platforms';
-import { Crusher, FallingBlock, HiddenSpike, Saw, Spike } from './hazards';
+import {
+  BouncePad,
+  Conveyor,
+  CrumblePlatform,
+  FakePlatform,
+  MovingPlatform,
+  PhasePlatform,
+  SolidPlatform,
+} from './platforms';
+import { Crusher, FallingBlock, HiddenSpike, Laser, Saw, Spike } from './hazards';
 
 export function createEntity(def: EntityDef, index: number, world: Matter.World): LevelEntity {
   const id = `${def.type}-${index}`;
@@ -22,6 +30,12 @@ export function createEntity(def: EntityDef, index: number, world: Matter.World)
       return new CrumblePlatform(world, id, def);
     case 'fakePlatform':
       return new FakePlatform(world, id, def);
+    case 'conveyor':
+      return new Conveyor(world, id, def);
+    case 'bouncePad':
+      return new BouncePad(world, id, def);
+    case 'phasePlatform':
+      return new PhasePlatform(world, id, def);
     case 'spike':
       return new Spike(world, id, def);
     case 'hiddenSpike':
@@ -32,5 +46,7 @@ export function createEntity(def: EntityDef, index: number, world: Matter.World)
       return new Saw(world, id, def);
     case 'crusher':
       return new Crusher(world, id, def);
+    case 'laser':
+      return new Laser(world, id, def);
   }
 }

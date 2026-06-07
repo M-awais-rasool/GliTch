@@ -28,6 +28,8 @@ export interface EntityContext {
   restingOn: (rect: RectLike) => boolean;
   /** Kill the player (hazard contact handled centrally, but some entities also call this). */
   kill: () => void;
+  /** Set the player's vertical velocity (used by bounce pads). */
+  bounce: (vy: number) => void;
 }
 
 export interface LevelEntity {

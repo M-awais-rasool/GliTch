@@ -116,6 +116,8 @@ export class LevelRuntime {
       grounded,
       restingOn: (rect) => this.restingOn(pr, vy, grounded, rect),
       kill: () => this.die(),
+      bounce: (vyOut) =>
+        Matter.Body.setVelocity(this.player.body, { x: this.player.velocity.x, y: vyOut }),
     };
   }
 

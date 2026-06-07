@@ -94,6 +94,81 @@ const BlockNode = memo(function BlockNode({ handle, theme }: NodeProps) {
   );
 });
 
+const ConveyorNode = memo(function ConveyorNode({ handle, theme }: NodeProps) {
+  const sign = handle.dir === 'left' ? -1 : 1;
+  const chevrons = useMemo(() => {
+    const cy = handle.height / 2;
+    const xs: string[] = [];
+    const gap = 26;
+    for (let cx = 14; cx < handle.width - 6; cx += gap) {
+      xs.push(
+        sign > 0
+          ? `M ${cx} ${cy - 5} L ${cx + 7} ${cy} L ${cx} ${cy + 5}`
+          : `M ${cx + 7} ${cy - 5} L ${cx} ${cy} L ${cx + 7} ${cy + 5}`,
+      );
+    }
+    return xs.join(' ');
+  }, [handle.width, handle.height, sign]);
+  const chevronTransform = useDerivedValue(() => [
+    { translateX: handle.x.value },
+    { translateY: handle.y.value },
+  ]);
+  return (
+    <Group>
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={handle.height} r={5} color={theme.platform} />
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={3} r={2} color={theme.accent} />
+      <Group transform={chevronTransform}>
+        <Path path={chevrons} color={theme.accent} style="stroke" strokeWidth={2.5} opacity={0.8} />
+      </Group>
+    </Group>
+  );
+});
+
+const BouncePadNode = memo(function BouncePadNode({ handle, theme }: NodeProps) {
+  const capY = useDerivedValue(() => handle.y.value + handle.extra.value * 4);
+  return (
+    <Group>
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={handle.height} r={5} color={theme.platformEdge} />
+      <RoundedRect x={handle.x} y={capY} width={handle.width} height={7} r={5} color={theme.accent} />
+    </Group>
+  );
+});
+
+const PhaseNode = memo(function PhaseNode({ handle, theme }: NodeProps) {
+  return (
+    <Group>
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={handle.height} r={5} color={theme.platform} opacity={handle.alpha} />
+      <RoundedRect
+        x={handle.x}
+        y={handle.y}
+        width={handle.width}
+        height={handle.height}
+        r={5}
+        color={theme.accent}
+        style="stroke"
+        strokeWidth={2}
+        opacity={handle.alpha}
+      />
+    </Group>
+  );
+});
+
+const LaserNode = memo(function LaserNode({ handle, theme }: NodeProps) {
+  const horizontal = handle.width >= handle.height;
+  const r = Math.min(handle.width, handle.height) / 2 + 3;
+  const e1x = useDerivedValue(() => handle.x.value + (horizontal ? 0 : handle.width / 2));
+  const e1y = useDerivedValue(() => handle.y.value + (horizontal ? handle.height / 2 : 0));
+  const e2x = useDerivedValue(() => handle.x.value + (horizontal ? handle.width : handle.width / 2));
+  const e2y = useDerivedValue(() => handle.y.value + (horizontal ? handle.height / 2 : handle.height));
+  return (
+    <Group>
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={handle.height} r={3} color={theme.hazard} opacity={handle.alpha} />
+      <Circle cx={e1x} cy={e1y} r={r} color={theme.accent} />
+      <Circle cx={e2x} cy={e2y} r={r} color={theme.accent} />
+    </Group>
+  );
+});
+
 export const EntityNode = memo(function EntityNode({ handle, theme }: NodeProps) {
   switch (handle.kind) {
     case 'spike':
@@ -101,6 +176,14 @@ export const EntityNode = memo(function EntityNode({ handle, theme }: NodeProps)
       return <SpikesNode handle={handle} theme={theme} />;
     case 'saw':
       return <SawNode handle={handle} theme={theme} />;
+    case 'conveyor':
+      return <ConveyorNode handle={handle} theme={theme} />;
+    case 'bouncePad':
+      return <BouncePadNode handle={handle} theme={theme} />;
+    case 'phasePlatform':
+      return <PhaseNode handle={handle} theme={theme} />;
+    case 'laser':
+      return <LaserNode handle={handle} theme={theme} />;
     default:
       return <BlockNode handle={handle} theme={theme} />;
   }

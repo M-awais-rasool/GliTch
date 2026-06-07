@@ -1,13 +1,14 @@
 /**
- * Level data model.
+ * Level data model — plain, serialisable, no engine/React imports.
  *
- * Levels are plain serialisable data (no engine/React imports) so they can be
- * authored by hand, generated, snapshotted or replayed. A `LevelDef` feeds both
- * the physics layer (which builds Matter bodies) and the renderer (which draws
- * Skia shapes) from the same source of truth.
+ * A `LevelDef` is the single source of truth for a level: it feeds the physics
+ * layer (Matter bodies), the renderer (Skia), and the level-select map. Each
+ * level carries its OWN `theme`, so every level looks completely different.
  *
- * All coordinates are world-space, top-left origin, Y down. Rects use top-left
- * x/y + width/height.
+ * Adding a level = create one data file and add it to the array in
+ * `registry.ts`. No engine/core changes required.
+ *
+ * Coordinates are world-space, top-left origin, Y down.
  */
 
 import type { WorldTheme } from '@/constants';
@@ -15,56 +16,50 @@ import type { Rect, Vector2 } from '@/types';
 
 export type SpikeDir = 'up' | 'down' | 'left' | 'right';
 
-/** Ping-pong path for moving entities (moving platform, saw). */
+/** Ping-pong path for moving entities. */
 export interface MovePath {
-  /** >= 2 waypoints (top-left positions). The entity ping-pongs along them. */
   points: Vector2[];
-  /** Travel speed in px/step. */
+  /** px/step. */
   speed: number;
-  /** Optional pause (ms) at each endpoint. */
   pauseMs?: number;
 }
 
-/**
- * Discriminated union of every authorable entity. Each variant is a `Rect`
- * (its initial bounds) plus a `type` tag and any extra params.
- */
+/** Discriminated union of every authorable entity (its initial `Rect` + params). */
 export type EntityDef =
+  // platforms / surfaces
   | ({ type: 'platform' } & Rect)
   | ({ type: 'movingPlatform'; path: MovePath } & Rect)
   | ({ type: 'crumblePlatform'; delayMs?: number } & Rect)
   | ({ type: 'fakePlatform' } & Rect)
+  | ({ type: 'conveyor'; dir: -1 | 1; speed?: number } & Rect)
+  | ({ type: 'bouncePad'; power?: number } & Rect)
+  | ({ type: 'phasePlatform'; onMs?: number; offMs?: number; phase?: number } & Rect)
+  // hazards
   | ({ type: 'spike'; dir?: SpikeDir } & Rect)
   | ({ type: 'hiddenSpike'; dir?: SpikeDir; triggerPad?: number } & Rect)
   | ({ type: 'fallingBlock'; triggerX?: number; fallAccel?: number; restY?: number } & Rect)
   | ({ type: 'saw'; path?: MovePath } & Rect)
-  | ({ type: 'crusher'; range: number; speed: number; pauseMs?: number } & Rect);
+  | ({ type: 'crusher'; range: number; speed: number; pauseMs?: number } & Rect)
+  | ({ type: 'laser'; onMs?: number; offMs?: number; phase?: number } & Rect);
 
 export type EntityType = EntityDef['type'];
 
 export interface LevelDef {
-  /** "1-1" style id. */
+  /** Short id, e.g. "1".."10". */
   id: string;
-  world: number;
-  /** 1-based sub-level index within its world. */
+  /** 1-based position in the journey (used by the map). */
   index: number;
   name: string;
+  /** This level's unique palette. */
+  theme: WorldTheme;
   /** Player spawn (top-left). */
   spawn: Vector2;
-  /** Finish zone. */
   goal: Rect;
   /** World bounds (camera clamps to this). */
   size: { width: number; height: number };
   /** Overrides DEFAULT_GRAVITY_Y when present. */
   gravity?: number;
   entities: EntityDef[];
-  /** Short one-liner shown at level start. */
+  /** One-line tutorial/teaser shown in the HUD. */
   hint?: string;
-}
-
-export interface WorldDef {
-  world: number;
-  name: string;
-  theme: WorldTheme;
-  levels: LevelDef[];
 }

@@ -50,11 +50,15 @@ export type EntityRenderKind =
   | 'movingPlatform'
   | 'crumblePlatform'
   | 'fakePlatform'
+  | 'conveyor'
+  | 'bouncePad'
+  | 'phasePlatform'
   | 'spike'
   | 'hiddenSpike'
   | 'fallingBlock'
   | 'saw'
-  | 'crusher';
+  | 'crusher'
+  | 'laser';
 
 /**
  * Per-entity render state. `x`/`y` are the CURRENT top-left in world space.

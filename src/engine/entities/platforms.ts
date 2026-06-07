@@ -126,3 +126,101 @@ export class FakePlatform extends BaseEntity {
     if (!this.body) this.addSolid(this.rect);
   }
 }
+
+/** Solid floor that drags the player sideways while they stand on it. */
+export class Conveyor extends BaseEntity {
+  private readonly speed: number;
+
+  constructor(world: Matter.World, id: string, def: Def<'conveyor'>) {
+    super(world, id, 'conveyor', def, def.dir > 0 ? 'right' : 'left');
+    this.speed = def.speed ?? 1.4;
+    this.addSolid(def);
+    // A constant carry IS the conveyor — applyCarry() moves the rider each step.
+    this.carry = { dx: def.dir * this.speed, dy: 0 };
+  }
+
+  update(): void {
+    // Scroll the surface stripes (renderer reads `extra` as a 0..1 phase).
+    this.render.extra.value = (this.render.extra.value + this.speed * 0.03) % 1;
+  }
+
+  reset(): void {
+    super.reset();
+    if (!this.body) this.addSolid(this.rect);
+  }
+}
+
+/** Thin pad that launches the player upward on contact. */
+export class BouncePad extends BaseEntity {
+  private readonly power: number;
+  private cooldown = 0;
+
+  constructor(world: Matter.World, id: string, def: Def<'bouncePad'>) {
+    super(world, id, 'bouncePad', def);
+    this.power = def.power ?? 14;
+    this.addSolid(def);
+  }
+
+  update(ctx: EntityContext): void {
+    if (this.cooldown > 0) this.cooldown -= ctx.dtMs;
+    if (this.cooldown <= 0 && ctx.playerVy >= -0.001 && ctx.restingOn(this.currentRect())) {
+      ctx.bounce(-this.power);
+      this.cooldown = 220;
+      this.render.extra.value = 1; // compress flash
+    } else {
+      this.render.extra.value = Math.max(0, this.render.extra.value - ctx.dtMs / 160);
+    }
+  }
+
+  reset(): void {
+    super.reset();
+    this.cooldown = 0;
+    if (!this.body) this.addSolid(this.rect);
+  }
+}
+
+/** Platform that blinks solid/empty on a timer (rhythm mechanic). */
+export class PhasePlatform extends BaseEntity {
+  private readonly onMs: number;
+  private readonly offMs: number;
+  private readonly phase0: number;
+  private timer: number;
+  private on = true;
+
+  constructor(world: Matter.World, id: string, def: Def<'phasePlatform'>) {
+    super(world, id, 'phasePlatform', def);
+    this.onMs = def.onMs ?? 1400;
+    this.offMs = def.offMs ?? 1000;
+    this.phase0 = def.phase ?? 0;
+    this.timer = this.phase0;
+    this.addSolid(def);
+  }
+
+  update(ctx: EntityContext): void {
+    this.timer += ctx.dtMs;
+    const period = this.on ? this.onMs : this.offMs;
+    if (this.timer >= period) {
+      this.timer = 0;
+      this.on = !this.on;
+      this.applyState();
+    }
+  }
+
+  private applyState(): void {
+    if (this.on) {
+      if (!this.body) this.addSolid(this.rect);
+      this.render.alpha.value = 1;
+    } else {
+      this.removeSolid();
+      this.render.alpha.value = 0.16; // ghost outline
+    }
+  }
+
+  reset(): void {
+    super.reset();
+    this.timer = this.phase0;
+    this.on = true;
+    if (!this.body) this.addSolid(this.rect);
+    this.render.alpha.value = 1;
+  }
+}

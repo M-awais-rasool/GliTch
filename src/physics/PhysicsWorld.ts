@@ -1,17 +1,19 @@
 /**
  * Owned wrapper around a Matter engine for a single level.
  *
- * Holds the engine, the player, and the grounded-detection CollisionSystem.
- * Level entities add their own solid bodies directly to `world`. The step is
- * split into `stepPlayer` (apply input/intent) and `integrate` (advance Matter)
- * so the LevelRuntime can interleave entity movement + player carrying between
- * them.
+ * Holds the engine, the player, and grounded detection. Level entities add
+ * their own solid bodies to `world`. The step is split into `stepPlayer` (apply
+ * input/intent) and `integrate` (advance Matter) so the LevelRuntime can
+ * interleave entity movement + player carrying between them.
+ *
+ * Supports gravity flipping: `setGravity` sets magnitude+direction and the
+ * grounded check is told the current sign so "ground" stays correct upside-down.
  */
 
 import Matter from 'matter-js';
 
 import { CollisionSystem } from '@/collision/CollisionSystem';
-import { Player, type PlayerInput } from '@/entities/player/Player';
+import { Player, type PlayerEnv, type PlayerInput } from '@/entities/player/Player';
 import type { Vector2 } from '@/types';
 
 export class PhysicsWorld {
@@ -19,6 +21,7 @@ export class PhysicsWorld {
   readonly player: Player;
 
   private readonly collisions: CollisionSystem;
+  private gravitySign = 1;
 
   constructor(spawn: Vector2, gravity: number) {
     this.engine = Matter.Engine.create({
@@ -27,7 +30,7 @@ export class PhysicsWorld {
     });
     this.player = new Player(spawn);
     Matter.Composite.add(this.engine.world, this.player.body);
-    this.collisions = new CollisionSystem(this.engine, this.player.body.id);
+    this.collisions = new CollisionSystem(this.engine, this.player.body.id, () => this.gravitySign);
   }
 
   get world(): Matter.World {
@@ -38,12 +41,14 @@ export class PhysicsWorld {
     return this.collisions.isGrounded;
   }
 
-  setGravity(gravity: number): void {
-    this.engine.gravity.y = gravity;
+  /** Set gravity magnitude+direction (negative y = pull upward). */
+  setGravity(gravityY: number): void {
+    this.engine.gravity.y = gravityY;
+    this.gravitySign = gravityY < 0 ? -1 : 1;
   }
 
-  stepPlayer(dtMs: number, input: PlayerInput): void {
-    this.player.update(dtMs, input, this.collisions.isGrounded);
+  stepPlayer(dtMs: number, input: PlayerInput, env: PlayerEnv): void {
+    this.player.update(dtMs, input, this.collisions.isGrounded, env);
   }
 
   integrate(dtMs: number): void {

@@ -1,12 +1,16 @@
 /**
  * Player entity — manually controlled platformer movement.
  *
- * Reads a polled input snapshot each fixed step and drives the Matter body:
- * accelerate toward a target horizontal speed (less control in air), friction
- * when idle, variable-height jump with coyote time + jump buffering, and a
- * clamped terminal fall speed. Body rotation is locked and friction is zero so
- * the feel is fully authored (no wall-stick / spin). Spawn is given as the
- * player's TOP-LEFT (matching level data); the body is centred internally.
+ * Reads a polled input snapshot + an environment snapshot each fixed step and
+ * drives the Matter body. The environment lets traps bend the rules:
+ *  - `onIce`     : sluggish accel + near-zero friction (you slide)
+ *  - `windX`     : a constant horizontal push you fight against
+ *  - `gravitySign`: +1 normal, -1 when in a gravity-flip zone. Jumping, the
+ *    variable-jump checks and terminal fall all flip with it, so the same feel
+ *    works upside-down.
+ *
+ * Body rotation is locked and friction is zero so the feel is fully authored.
+ * Spawn is the player's TOP-LEFT (matching level data); body is centred.
  */
 
 import Matter from 'matter-js';
@@ -17,6 +21,8 @@ import {
   COYOTE_TIME_MS,
   GROUND_ACCEL,
   GROUND_FRICTION,
+  ICE_ACCEL,
+  ICE_FRICTION,
   JUMP_BUFFER_MS,
   JUMP_CUT_FACTOR,
   JUMP_HOLD_FORCE,
@@ -27,14 +33,20 @@ import {
   PLAYER_HEIGHT,
   PLAYER_WIDTH,
 } from '@/constants';
+import { hapticLight } from '@/services/haptics';
 import type { Vector2 } from '@/types';
 
 export interface PlayerInput {
-  /** -1 left, 0 none, 1 right. */
-  axis: number;
+  axis: number; // -1 left, 0 none, 1 right
   jumpHeld: boolean;
-  /** True only on the step a fresh jump press is consumed. */
   jumpPressed: boolean;
+}
+
+export interface PlayerEnv {
+  onIce: boolean;
+  windX: number;
+  /** +1 normal gravity, -1 flipped. */
+  gravitySign: number;
 }
 
 export class Player {
@@ -46,6 +58,7 @@ export class Player {
   private holdElapsed = 0;
   private timeSinceGrounded = Number.POSITIVE_INFINITY;
   private jumpBuffer = Number.POSITIVE_INFINITY;
+  private wasGrounded = false;
 
   constructor(spawnTopLeft: Vector2) {
     this.body = Matter.Bodies.rectangle(
@@ -65,7 +78,6 @@ export class Player {
     return this.body.velocity;
   }
 
-  /** Top-left AABB in world space. */
   get rect(): { x: number; y: number; width: number; height: number } {
     return {
       x: this.body.position.x - PLAYER_WIDTH / 2,
@@ -75,59 +87,74 @@ export class Player {
     };
   }
 
-  /** Called once per fixed step BEFORE Matter integrates. */
-  update(dtMs: number, input: PlayerInput, grounded: boolean): void {
+  update(dtMs: number, input: PlayerInput, grounded: boolean, env: PlayerEnv): void {
     if (!this.alive) return;
+    const sign = env.gravitySign;
 
     if (grounded) {
       this.timeSinceGrounded = 0;
-      if (this.velocity.y >= 0) this.jumping = false; // landed
+      if (this.velocity.y * sign >= 0) this.jumping = false; // resting on the ground
     } else {
       this.timeSinceGrounded += dtMs;
     }
 
+    // landing feedback
+    if (grounded && !this.wasGrounded && Math.abs(this.velocity.y) > 2.5) hapticLight();
+    this.wasGrounded = grounded;
+
     // --- horizontal ---
     let vx = this.velocity.x;
+    const accel = env.onIce ? ICE_ACCEL : grounded ? GROUND_ACCEL : AIR_ACCEL;
+    const friction = env.onIce ? ICE_FRICTION : grounded ? GROUND_FRICTION : AIR_FRICTION;
     if (input.axis !== 0) {
       this.facing = input.axis > 0 ? 1 : -1;
-      const target = input.axis * MOVE_MAX_SPEED;
-      vx += (target - vx) * (grounded ? GROUND_ACCEL : AIR_ACCEL);
+      // If a dash/boost has us moving FASTER than walk speed in the held
+      // direction, keep that momentum (bleed it with friction) instead of
+      // braking back to walk speed — otherwise holding "forward" cancels a dash.
+      if (vx * input.axis > MOVE_MAX_SPEED) {
+        vx *= friction;
+      } else {
+        vx += (input.axis * MOVE_MAX_SPEED - vx) * accel;
+      }
     } else {
-      vx *= grounded ? GROUND_FRICTION : AIR_FRICTION;
+      vx *= friction;
       if (Math.abs(vx) < 0.02) vx = 0;
     }
+    vx += env.windX; // environmental push
 
-    // --- vertical / jump ---
+    // --- vertical / jump (all relative to gravity direction) ---
     let vy = this.velocity.y;
 
     if (input.jumpPressed) this.jumpBuffer = 0;
     else this.jumpBuffer += dtMs;
 
     const canJump = grounded || this.timeSinceGrounded <= COYOTE_TIME_MS;
-    if (this.jumpBuffer <= JUMP_BUFFER_MS && canJump && vy >= -0.001) {
-      vy = -JUMP_VELOCITY;
+    if (this.jumpBuffer <= JUMP_BUFFER_MS && canJump && vy * sign >= -0.001) {
+      vy = -JUMP_VELOCITY * sign; // jump away from the ground
       this.jumping = true;
       this.holdElapsed = 0;
       this.jumpBuffer = Number.POSITIVE_INFINITY;
       this.timeSinceGrounded = Number.POSITIVE_INFINITY;
+      hapticLight();
     }
 
-    // variable jump: release early while ascending => short hop (cut once)
-    if (this.jumping && !input.jumpHeld && vy < 0) {
+    // variable jump: release early while still ascending => short hop
+    if (this.jumping && !input.jumpHeld && vy * sign < 0) {
       vy *= JUMP_CUT_FACTOR;
       this.jumping = false;
     }
 
-    // hold => higher jump (mass-scaled force applied during integration)
-    if (input.jumpHeld && this.jumping && this.holdElapsed < JUMP_HOLD_MAX_MS && vy < 0) {
+    // hold => higher jump (force points away from gravity)
+    if (input.jumpHeld && this.jumping && this.holdElapsed < JUMP_HOLD_MAX_MS && vy * sign < 0) {
       Matter.Body.applyForce(this.body, this.body.position, {
         x: 0,
-        y: -JUMP_HOLD_FORCE * this.body.mass,
+        y: -JUMP_HOLD_FORCE * this.body.mass * sign,
       });
       this.holdElapsed += dtMs;
     }
 
-    if (vy > MAX_FALL_SPEED) vy = MAX_FALL_SPEED;
+    // terminal fall speed (along gravity)
+    if (vy * sign > MAX_FALL_SPEED) vy = MAX_FALL_SPEED * sign;
 
     Matter.Body.setVelocity(this.body, { x: vx, y: vy });
   }
@@ -150,5 +177,6 @@ export class Player {
     this.holdElapsed = 0;
     this.timeSinceGrounded = Number.POSITIVE_INFINITY;
     this.jumpBuffer = Number.POSITIVE_INFINITY;
+    this.wasGrounded = false;
   }
 }

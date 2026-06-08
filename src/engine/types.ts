@@ -53,12 +53,19 @@ export type EntityRenderKind =
   | 'conveyor'
   | 'bouncePad'
   | 'phasePlatform'
+  | 'iceFloor'
   | 'spike'
   | 'hiddenSpike'
   | 'fallingBlock'
   | 'saw'
   | 'crusher'
-  | 'laser';
+  | 'laser'
+  | 'pendulum'
+  | 'chaser'
+  | 'windZone'
+  | 'dashPad'
+  | 'portal'
+  | 'gravityZone';
 
 /**
  * Per-entity render state. `x`/`y` are the CURRENT top-left in world space.
@@ -70,8 +77,12 @@ export interface EntityRenderHandle {
   kind: EntityRenderKind;
   width: number;
   height: number;
-  /** Static orientation hint (spikes). */
+  /** Static orientation hint (spikes / conveyors). */
   dir?: SpikeDir;
+  /** Fixed initial top-left — used to draw stationary parts when x/y animate
+   *  (e.g. a pendulum pivot, a chaser's reference). */
+  originX: number;
+  originY: number;
   x: SharedValue<number>;
   y: SharedValue<number>;
   angle: SharedValue<number>;

@@ -19,6 +19,9 @@ export class CollisionSystem {
   constructor(
     private readonly engine: Matter.Engine,
     private readonly playerId: number,
+    /** Returns +1 (normal) or -1 (flipped) gravity so "ground" is the surface
+     *  the player is pulled onto. */
+    private readonly getGravitySign: () => number = () => 1,
   ) {
     Matter.Events.on(this.engine, 'collisionStart', this.handleStart);
     Matter.Events.on(this.engine, 'collisionEnd', this.handleEnd);
@@ -55,8 +58,9 @@ export class CollisionSystem {
       if (!other || (other.label as BodyLabel) !== 'platform') continue;
 
       const player = pair.bodyA.id === this.playerId ? pair.bodyA : pair.bodyB;
-      // Landing from above: player centre is higher (smaller y) than platform.
-      if (player.position.y < other.position.y) {
+      // "Ground" is whichever side gravity pulls the player onto: normally the
+      // platform below (player above it); flipped, the platform above.
+      if ((player.position.y - other.position.y) * this.getGravitySign() < 0) {
         this.groundContacts.add(other.id);
       }
     }

@@ -23,6 +23,10 @@ export const GROUND_FRICTION = 0.74;
 /** Velocity decay per step when no input is held (airborne). */
 export const AIR_FRICTION = 0.96;
 
+/** On ice: sluggish acceleration + almost no friction (you slide). */
+export const ICE_ACCEL = 0.1;
+export const ICE_FRICTION = 0.992;
+
 // --- Jump -----------------------------------------------------------------
 
 export const JUMP_VELOCITY = 9.4;

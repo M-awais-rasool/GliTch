@@ -34,13 +34,21 @@ export type EntityDef =
   | ({ type: 'conveyor'; dir: -1 | 1; speed?: number } & Rect)
   | ({ type: 'bouncePad'; power?: number } & Rect)
   | ({ type: 'phasePlatform'; onMs?: number; offMs?: number; phase?: number } & Rect)
+  | ({ type: 'iceFloor' } & Rect)
   // hazards
   | ({ type: 'spike'; dir?: SpikeDir } & Rect)
   | ({ type: 'hiddenSpike'; dir?: SpikeDir; triggerPad?: number } & Rect)
   | ({ type: 'fallingBlock'; triggerX?: number; fallAccel?: number; restY?: number } & Rect)
   | ({ type: 'saw'; path?: MovePath } & Rect)
   | ({ type: 'crusher'; range: number; speed: number; pauseMs?: number } & Rect)
-  | ({ type: 'laser'; onMs?: number; offMs?: number; phase?: number } & Rect);
+  | ({ type: 'laser'; onMs?: number; offMs?: number; phase?: number } & Rect)
+  | ({ type: 'pendulum'; length: number; amplitude?: number; speed?: number } & Rect)
+  | ({ type: 'chaser'; speed: number; startDelayMs?: number } & Rect)
+  // fields / zones / transport (rect = the affected area)
+  | ({ type: 'windZone'; force: number } & Rect)
+  | ({ type: 'gravityZone' } & Rect)
+  | ({ type: 'dashPad'; dir: -1 | 1; power?: number } & Rect)
+  | ({ type: 'portal'; pairId: string } & Rect);
 
 export type EntityType = EntityDef['type'];
 

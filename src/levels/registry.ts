@@ -17,6 +17,16 @@ import { level07 } from './defs/level07';
 import { level08 } from './defs/level08';
 import { level09 } from './defs/level09';
 import { level10 } from './defs/level10';
+import { level11 } from './defs/level11';
+import { level12 } from './defs/level12';
+import { level13 } from './defs/level13';
+import { level14 } from './defs/level14';
+import { level15 } from './defs/level15';
+import { level16 } from './defs/level16';
+import { level17 } from './defs/level17';
+import { level18 } from './defs/level18';
+import { level19 } from './defs/level19';
+import { level20 } from './defs/level20';
 
 /** Ordered journey. Append new levels here. */
 export const LEVELS: LevelDef[] = [
@@ -30,6 +40,16 @@ export const LEVELS: LevelDef[] = [
   level08,
   level09,
   level10,
+  level11,
+  level12,
+  level13,
+  level14,
+  level15,
+  level16,
+  level17,
+  level18,
+  level19,
+  level20,
 ];
 
 export const TOTAL_LEVELS = LEVELS.length;

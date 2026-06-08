@@ -30,6 +30,8 @@ export interface EntityContext {
   kill: () => void;
   /** Set the player's vertical velocity (used by bounce pads). */
   bounce: (vy: number) => void;
+  /** Set the player's horizontal velocity (used by dash pads). */
+  boostX: (vx: number) => void;
 }
 
 export interface LevelEntity {
@@ -43,6 +45,12 @@ export interface LevelEntity {
   currentRect: () => RectLike;
   /** Per-step delta of a moving solid surface, for carrying the player. */
   readonly carry: { dx: number; dy: number } | null;
+  /** Special surface modifier the player picks up while standing on it. */
+  readonly surfaceType?: 'ice';
+  /** Field zone applied while the player overlaps this entity's rect. */
+  readonly zone?: { kind: 'wind'; force: number } | { kind: 'gravity' };
+  /** Portals with the same pair id teleport between each other. */
+  readonly portalPairId?: string;
   update: (ctx: EntityContext) => void;
   /** Restore initial state (on respawn). */
   reset: () => void;
@@ -60,6 +68,8 @@ export function makeRenderHandle(
     width: rect.width,
     height: rect.height,
     dir,
+    originX: rect.x,
+    originY: rect.y,
     x: makeMutable(rect.x),
     y: makeMutable(rect.y),
     angle: makeMutable(0),
@@ -72,6 +82,9 @@ export abstract class BaseEntity implements LevelEntity {
   readonly id: string;
   readonly render: EntityRenderHandle;
   carry: { dx: number; dy: number } | null = null;
+  surfaceType?: 'ice';
+  zone?: { kind: 'wind'; force: number } | { kind: 'gravity' };
+  portalPairId?: string;
 
   protected body: Matter.Body | null = null;
 

@@ -18,6 +18,7 @@ import {
   SolidPlatform,
 } from './platforms';
 import { Crusher, FallingBlock, HiddenSpike, Laser, Saw, Spike } from './hazards';
+import { Chaser, DashPad, GravityZone, IceFloor, Pendulum, Portal, WindZone } from './mechanics2';
 
 export function createEntity(def: EntityDef, index: number, world: Matter.World): LevelEntity {
   const id = `${def.type}-${index}`;
@@ -48,5 +49,19 @@ export function createEntity(def: EntityDef, index: number, world: Matter.World)
       return new Crusher(world, id, def);
     case 'laser':
       return new Laser(world, id, def);
+    case 'iceFloor':
+      return new IceFloor(world, id, def);
+    case 'windZone':
+      return new WindZone(world, id, def);
+    case 'gravityZone':
+      return new GravityZone(world, id, def);
+    case 'portal':
+      return new Portal(world, id, def);
+    case 'dashPad':
+      return new DashPad(world, id, def);
+    case 'pendulum':
+      return new Pendulum(world, id, def);
+    case 'chaser':
+      return new Chaser(world, id, def);
   }
 }

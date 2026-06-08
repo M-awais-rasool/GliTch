@@ -152,6 +152,13 @@ results. Here's what each one does, in simple terms:
 | **Saw** | A spinning blade, optionally moving along a path. Deadly to touch. | `hazards.ts` |
 | **Laser** | A beam that turns on/off on a timer; deadly only while on. | `hazards.ts` |
 | **Crusher** | A heavy block that slams down on a timer; its leading edge crushes you. | `hazards.ts` |
+| **Ice floor** | Solid, but near-frictionless — you slide (the player picks up `onIce`). | `mechanics2.ts` |
+| **Wind zone** | A field that constantly pushes you sideways while you're inside it. | `mechanics2.ts` |
+| **Gravity zone** | While inside, gravity flips — you fall *up* and walk the ceiling. | `mechanics2.ts` |
+| **Portal** | Paired teleporters; enter one, exit its partner (logic in the runtime). | `mechanics2.ts` |
+| **Dash pad** | A pass-through gate that flings you horizontally. | `mechanics2.ts` |
+| **Pendulum** | A blade swinging on an arc from a fixed pivot (real pendulum motion). | `mechanics2.ts` |
+| **Chaser** | A wall of spikes that advances from behind — keep moving or it catches you. | `mechanics2.ts` |
 
 **Two reusable helpers do a lot of the work:**
 
@@ -162,6 +169,17 @@ results. Here's what each one does, in simple terms:
   the runtime nudges *you* by that amount too. Moving platforms set it to their
   own movement; conveyors set a constant value (so they push you even when they
   don't move).
+
+### Environment effects (ice / wind / gravity / portals)
+
+Some mechanics don't kill or block — they bend the rules. Each step the runtime
+looks at what's around the player and builds an **environment snapshot**
+(`{ onIce, windX, gravitySign }`) which `Player.update` reads: ice swaps in
+slippery acceleration/friction, wind adds a constant sideways push, and a
+gravity zone flips `gravitySign` so jumping, falling and "what counts as the
+ground" all invert — the same controls work upside-down. Portals are resolved
+separately: after physics, if you overlap one you're teleported to its partner
+(with a short cooldown so you don't bounce straight back).
 
 ### Hazards are checked by overlap, not physics
 
@@ -198,6 +216,15 @@ The order each step is deliberate:
 - **Win** shows the clear screen and unlocks the next level.
 
 ---
+
+## 6b. Haptics
+
+A small plain module ([`services/haptics.ts`](../src/services/haptics.ts))
+provides semantic taps (light/medium/heavy/success/error/selection) gated by a
+global on/off flag (the menu toggle). The engine and entities call it directly
+(it's not React): light on jump/land, medium on bounce/dash/teleport/gravity
+flip, error on death, success on level complete; the UI calls selection on every
+button/node press.
 
 ## 7. The camera
 

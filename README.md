@@ -12,10 +12,11 @@ A fast, minimal **dark-neon platformer** for iOS & Android where **nothing is sa
 
 ## ✨ Features
 
-- **10 hand-crafted levels**, each with a *unique* signature mechanic, its own neon theme, and rising difficulty — no repeated patterns.
+- **20 hand-crafted levels**, each with a *unique* signature mechanic, its own neon theme, and rising difficulty — no repeated patterns.
 - **A living level map** — a glowing, animated journey path (not a flat list) that lights up as you progress.
 - **Responsive manual controls** — on-screen Left / Right / Jump with true multi-touch (move *and* jump together), variable-height jumps, coyote time and jump buffering for a tight feel.
-- **Surprise-driven trap design** — fake platforms, crumbling stones, pop-up spikes, falling blocks, saws, crushers, conveyors, bounce pads, phasing platforms and laser gates.
+- **Surprise-driven trap design** — fake platforms, crumbling stones, pop-up spikes, falling blocks, saws, crushers, conveyors, bounce pads, phasing platforms, laser gates — plus second-wave mechanics: **wind zones, ice, portals, pendulums, an advancing kill-wall, dash gates and gravity flips**.
+- **Haptic feedback throughout** — jumps, landings, bounces, dashes, teleports, gravity flips, deaths, wins and every UI press (toggleable on the menu).
 - **A polished procedural character** — a neon robot animated entirely in code (squash & stretch, run cycle, glow, death burst). No sprite assets.
 - **60 fps engine** — fixed-timestep physics with render interpolation; the whole render path runs on the UI thread with **zero React re-renders**.
 - **Landscape**, **instant respawn**, per-level best/deaths, and a fully **data-driven** level system.
@@ -44,7 +45,17 @@ A fast, minimal **dark-neon platformer** for iOS & Android where **nothing is sa
 | 7 | Sawmill | Ember | Spinning saw gauntlet |
 | 8 | Ceiling | Pulse | Falling blocks + crushers (danger from above) |
 | 9 | Rhythm | Abyss | Phasing platforms + laser gates |
-| 10 | Gauntlet | Overload | Everything at once (finale) |
+| 10 | Gauntlet | Overload | Everything (act-1 finale) |
+| 11 | Headwind | Gale | Wind zones (head/tail gusts) |
+| 12 | Slip | Glacier | Ice floors (no traction) |
+| 13 | Warp | Rift | Portal teleporters |
+| 14 | Pendulums | Swing | Swinging blades |
+| 15 | The Wall | Outrun | An advancing wall of spikes |
+| 16 | Dash | Velocity | Dash gates over spike pits |
+| 17 | Invert | Upside Down | Gravity-flip ceiling run |
+| 18 | Chaos | Storm | Ice **+** wind combo |
+| 19 | Pressure | Relay | Chaser **+** portal **+** pendulum |
+| 20 | Singularity | Singularity | Every mechanic (grand finale) |
 
 ## 🧱 Tech stack
 

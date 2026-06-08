@@ -4,18 +4,21 @@
  */
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NeonButton } from '@/components/ui/NeonButton';
 import { FontSize, GlitchColors, Palette, Spacing } from '@/constants';
 import { FIRST_LEVEL_ID } from '@/levels/registry';
 import type { RootStackParamList } from '@/navigation/types';
+import { useSettingsStore } from '@/store/settingsStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MainMenu'>;
 
 export function MainMenuScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const haptics = useSettingsStore((s) => s.hapticsEnabled);
+  const toggleHaptics = useSettingsStore((s) => s.toggleHaptics);
 
   return (
     <View
@@ -43,6 +46,9 @@ export function MainMenuScreen({ navigation }: Props) {
           style={styles.button}
           onPress={() => navigation.navigate('Game', { levelId: FIRST_LEVEL_ID })}
         />
+        <Pressable hitSlop={10} onPress={toggleHaptics} style={styles.toggle}>
+          <Text style={styles.toggleText}>HAPTICS: {haptics ? 'ON' : 'OFF'}</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -81,4 +87,15 @@ const styles = StyleSheet.create({
   button: {
     minWidth: 240,
   },
+  toggle: {
+    marginTop: Spacing.sm,
+    alignItems: 'center',
+  },
+  toggleText: {
+    color: Palette.textMuted,
+    fontSize: FontSize.caption,
+    fontWeight: '700',
+    letterSpacing: 2,
+  },
 });
+

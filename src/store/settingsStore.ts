@@ -1,9 +1,13 @@
 /**
  * Player settings. Separated from game state so it can later be persisted
- * (AsyncStorage / Supabase cloud save) independently of a play session.
+ * (AsyncStorage / cloud save) independently of a play session. The haptics flag
+ * is mirrored into the plain `haptics` service so engine code (no React) honours
+ * it without importing the store.
  */
 
 import { create } from 'zustand';
+
+import { setHapticsEnabled } from '@/services/haptics';
 
 interface SettingsStore {
   soundEnabled: boolean;
@@ -13,7 +17,6 @@ interface SettingsStore {
   toggleSound: () => void;
   toggleMusic: () => void;
   toggleHaptics: () => void;
-  set: (partial: Partial<Pick<SettingsStore, 'soundEnabled' | 'musicEnabled' | 'hapticsEnabled'>>) => void;
 }
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
@@ -23,6 +26,10 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
 
   toggleSound: () => set((s) => ({ soundEnabled: !s.soundEnabled })),
   toggleMusic: () => set((s) => ({ musicEnabled: !s.musicEnabled })),
-  toggleHaptics: () => set((s) => ({ hapticsEnabled: !s.hapticsEnabled })),
-  set: (partial) => set(partial),
+  toggleHaptics: () =>
+    set((s) => {
+      const next = !s.hapticsEnabled;
+      setHapticsEnabled(next);
+      return { hapticsEnabled: next };
+    }),
 }));

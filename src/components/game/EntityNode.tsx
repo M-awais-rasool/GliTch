@@ -8,7 +8,7 @@
  * thread with zero React re-renders.
  */
 
-import { Circle, Group, Path, RoundedRect } from '@shopify/react-native-skia';
+import { Circle, Group, Line, Path, RoundedRect, vec } from '@shopify/react-native-skia';
 import { memo, useMemo } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
@@ -169,6 +169,138 @@ const LaserNode = memo(function LaserNode({ handle, theme }: NodeProps) {
   );
 });
 
+/** Chevron path across `width`, pointing in `sign` (+1 right / -1 left), at `cy`. */
+function chevronRow(width: number, cy: number, sign: number, gap = 26): string {
+  const xs: string[] = [];
+  for (let cx = 12; cx < width - 6; cx += gap) {
+    xs.push(
+      sign > 0
+        ? `M ${cx} ${cy - 5} L ${cx + 7} ${cy} L ${cx} ${cy + 5}`
+        : `M ${cx + 7} ${cy - 5} L ${cx} ${cy} L ${cx + 7} ${cy + 5}`,
+    );
+  }
+  return xs.join(' ');
+}
+
+/** Upward chevron column for gravity zones. */
+function chevronColumnUp(width: number, height: number, gap = 28): string {
+  const xs: string[] = [];
+  const cx = width / 2;
+  for (let cy = height - 12; cy > 6; cy -= gap) {
+    xs.push(`M ${cx - 6} ${cy} L ${cx} ${cy - 7} L ${cx + 6} ${cy}`);
+  }
+  return xs.join(' ');
+}
+
+const IceFloorNode = memo(function IceFloorNode({ handle, theme }: NodeProps) {
+  return (
+    <Group>
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={handle.height} r={5} color={theme.platform} />
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={4} r={2} color="#BFEFFF" />
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={handle.height} r={5} color="#FFFFFF" opacity={0.07} />
+    </Group>
+  );
+});
+
+const ZoneNode = memo(function ZoneNode({ handle, theme }: NodeProps) {
+  const arrows = useMemo(
+    () =>
+      handle.kind === 'gravityZone'
+        ? chevronColumnUp(handle.width, handle.height)
+        : chevronRow(handle.width, handle.height / 2, handle.dir === 'left' ? -1 : 1, 34),
+    [handle.kind, handle.width, handle.height, handle.dir],
+  );
+  const transform = useDerivedValue(() => [{ translateX: handle.x.value }, { translateY: handle.y.value }]);
+  return (
+    <Group>
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={handle.height} r={8} color={theme.accent} opacity={0.08} />
+      <RoundedRect x={handle.x} y={handle.y} width={handle.width} height={handle.height} r={8} color={theme.accent} style="stroke" strokeWidth={1.5} opacity={0.35} />
+      <Group transform={transform}>
+        <Path path={arrows} color={theme.accent} style="stroke" strokeWidth={2} opacity={0.5} />
+      </Group>
+    </Group>
+  );
+});
+
+const DashPadNode = memo(function DashPadNode({ handle, theme }: NodeProps) {
+  const arrows = useMemo(
+    () => chevronRow(handle.width, handle.height / 2, handle.dir === 'left' ? -1 : 1, 18),
+    [handle.width, handle.height, handle.dir],
+  );
+  const transform = useDerivedValue(() => [{ translateX: handle.x.value }, { translateY: handle.y.value }]);
+  const glow = useDerivedValue(() => 0.45 + 0.5 * handle.extra.value);
+  return (
+    <Group transform={transform}>
+      <RoundedRect x={0} y={0} width={handle.width} height={handle.height} r={6} color={theme.accent} opacity={0.12} />
+      <Path path={arrows} color={theme.accent} style="stroke" strokeWidth={3} opacity={glow} />
+    </Group>
+  );
+});
+
+const PortalNode = memo(function PortalNode({ handle, theme }: NodeProps) {
+  const r = Math.min(handle.width, handle.height) / 2;
+  const transform = useDerivedValue(() => [
+    { translateX: handle.x.value + handle.width / 2 },
+    { translateY: handle.y.value + handle.height / 2 },
+    { rotate: handle.angle.value },
+  ]);
+  return (
+    <Group>
+      <Circle cx={handle.originX + handle.width / 2} cy={handle.originY + handle.height / 2} r={r + 4} color={theme.accent} opacity={0.18} />
+      <Group transform={transform}>
+        <Circle cx={0} cy={0} r={r} color={theme.accent} style="stroke" strokeWidth={4} />
+        <Circle cx={0} cy={0} r={r * 0.6} color={theme.accent} style="stroke" strokeWidth={2} opacity={0.6} />
+        <Circle cx={0} cy={-r} r={3} color={theme.accent} />
+      </Group>
+    </Group>
+  );
+});
+
+const PendulumNode = memo(function PendulumNode({ handle, theme }: NodeProps) {
+  const r = handle.width / 2;
+  const blade = useMemo(() => bladePath(r), [r]);
+  const pivot = vec(handle.originX + handle.width / 2, handle.originY + handle.height / 2);
+  const bladeCenter = useDerivedValue(() => ({ x: handle.x.value + r, y: handle.y.value + r }));
+  const transform = useDerivedValue(() => [
+    { translateX: handle.x.value + r },
+    { translateY: handle.y.value + r },
+    { rotate: handle.angle.value },
+  ]);
+  return (
+    <Group>
+      <Line p1={pivot} p2={bladeCenter} color={theme.platformEdge} strokeWidth={3} />
+      <Circle cx={pivot.x} cy={pivot.y} r={5} color={theme.platformEdge} />
+      <Group transform={transform}>
+        <Path path={blade} color={theme.hazard} />
+        <Circle cx={0} cy={0} r={r * 0.5} color={theme.background} />
+        <Circle cx={0} cy={0} r={r * 0.18} color={theme.hazard} />
+      </Group>
+    </Group>
+  );
+});
+
+const ChaserNode = memo(function ChaserNode({ handle, theme }: NodeProps) {
+  const teeth = useMemo(() => {
+    const t = 22;
+    const n = Math.max(1, Math.round(handle.height / t));
+    const step = handle.height / n;
+    let d = '';
+    for (let i = 0; i < n; i += 1) {
+      const y0 = i * step;
+      d += `M ${handle.width} ${y0} L ${handle.width + 14} ${y0 + step / 2} L ${handle.width} ${y0 + step} Z `;
+    }
+    return d;
+  }, [handle.width, handle.height]);
+  const transform = useDerivedValue(() => [{ translateX: handle.x.value }, { translateY: handle.y.value }]);
+  return (
+    <Group transform={transform}>
+      <RoundedRect x={-6} y={0} width={handle.width + 6} height={handle.height} r={3} color={theme.hazard} opacity={0.18} />
+      <RoundedRect x={0} y={0} width={handle.width} height={handle.height} r={3} color={theme.hazard} opacity={0.9} />
+      <Path path={teeth} color={theme.hazard} />
+    </Group>
+  );
+});
+
 export const EntityNode = memo(function EntityNode({ handle, theme }: NodeProps) {
   switch (handle.kind) {
     case 'spike':
@@ -184,6 +316,19 @@ export const EntityNode = memo(function EntityNode({ handle, theme }: NodeProps)
       return <PhaseNode handle={handle} theme={theme} />;
     case 'laser':
       return <LaserNode handle={handle} theme={theme} />;
+    case 'iceFloor':
+      return <IceFloorNode handle={handle} theme={theme} />;
+    case 'windZone':
+    case 'gravityZone':
+      return <ZoneNode handle={handle} theme={theme} />;
+    case 'dashPad':
+      return <DashPadNode handle={handle} theme={theme} />;
+    case 'portal':
+      return <PortalNode handle={handle} theme={theme} />;
+    case 'pendulum':
+      return <PendulumNode handle={handle} theme={theme} />;
+    case 'chaser':
+      return <ChaserNode handle={handle} theme={theme} />;
     default:
       return <BlockNode handle={handle} theme={theme} />;
   }

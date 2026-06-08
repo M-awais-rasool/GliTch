@@ -21,6 +21,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { FontSize, Palette } from '@/constants';
+import { hapticSelect } from '@/services/haptics';
 
 export interface MapNode {
   id: string;
@@ -82,7 +83,10 @@ export const LevelMapNode = memo(function LevelMapNode({ node, onPress }: Props)
         disabled={node.locked}
         onPressIn={() => (press.value = withTiming(1, { duration: 80 }))}
         onPressOut={() => (press.value = withTiming(0, { duration: 120 }))}
-        onPress={() => onPress(node.id)}
+        onPress={() => {
+          hapticSelect();
+          onPress(node.id);
+        }}
         style={[
           styles.node,
           { backgroundColor: fill, borderColor: border, shadowColor: node.accent, opacity: node.locked ? 0.5 : 1 },

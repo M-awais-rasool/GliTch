@@ -14,6 +14,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CONTROL, Palette, Radius } from '@/constants';
+import { hapticSelect } from '@/services/haptics';
 import type { InputState } from '@/input/InputState';
 
 interface ControlsProps {
@@ -40,6 +41,7 @@ function ControlButton({ size, accent, glyph, onDown, onUp, style }: ControlButt
     .runOnJS(true)
     .onTouchesDown(() => {
       setPressed(true);
+      hapticSelect();
       onDown();
     })
     .onTouchesUp(() => {

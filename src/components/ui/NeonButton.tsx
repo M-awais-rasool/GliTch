@@ -11,6 +11,7 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
 
 import { FontSize, GlitchColors, Palette, Radius, Spacing } from '@/constants';
+import { hapticSelect } from '@/services/haptics';
 
 interface NeonButtonProps {
   label: string;
@@ -30,7 +31,10 @@ export const NeonButton = memo(function NeonButton({
   const isSolid = variant === 'solid';
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        hapticSelect();
+        onPress();
+      }}
       style={({ pressed }) => [
         styles.base,
         isSolid ? { backgroundColor: color } : { borderColor: color, borderWidth: 2 },
